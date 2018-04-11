@@ -1,122 +1,237 @@
+#------------------------------------------------------------------------------+
+#
+#   Morais, Kleyson.
+#   Correlation-Based Feature Selection-CFS with Python
+#   April, 2018
+#
+#------------------------------------------------------------------------------+
+
+#--- IMPORT DEPENDENCIES ------------------------------------------------------+
+
 import pandas as pd
+import numpy as np
 import csv
 
-# Função para leitura de CSV
 def getData(text):
+    """
+    Função para leitura de CSV.
+    """
     with open(text, 'rb') as ficheiro:
         reader = csv.reader(ficheiro)
         return reader
 
-# Esta função serve para separar o conjunto em duas partes
-# data: é referente aos dados
-# atributo: é referente à alguma coluna específica
-# value: valor a ser consultado, esse valor será usado para separar o conjunto
-def divideset(data, atributo, value):
-    split_function = None # função de acordo com a situação.
-    if isinstance(value,int) or isinstance(value,float):
-        split_function = lambda row:row[atributo]&amp;amp;amp;amp;amp;amp;gt;value # se o valor é int ou float.
-    else:
-        split_function = lambda row:row[atributo]==value # se for string
+def divideset(feature1, feature2, value):
+    """
+    Esta função serve para selecionar apenas as linhas da feature2, onde o valor na mesma linha
+    da feature1 seja igual ao valor informado, no caso, value.
 
-    set1 = [row for row in data if split_function(row)]
-    set2 = [row for row in data if not split_function(row)]
-    return (set1, set2)
+    Input
+    ----------
+    feature1: Coluna de atributo primária
+    feature2: Coluna de atributo secundária
+    value: Valor de seleção
 
-# Essa função irá contar a ocorrência de classes em um determinado conjunto de dados
-# O parâmetro coluna deve receber o valor da coluna que deseja-se contar
-def uniquecounts(data, atributo):
+    Output
+    ----------
+    set1: Subconjunto da feature2
+    """
+    set1 = []
+    for item in range(len(feature1)):
+        if feature1[item] == value:
+            set1.append(feature2[item])
+    return set1
+
+def uniquecounts(feature):
+    """
+    Essa função irá contar a ocorrência de classes em um determinado conjunto de dados
+
+    Input
+    ----------
+    feature: Coluna de interesse
+
+    Output
+    ----------
+    results: Contador de classes da coluna
+    """
     results = {}
-    for row in data:
-        # r = row[-1] # Ultima coluna 
-        r = row[atributo] # Coluna onde se encontra a classe
-        if r not in results:
-            results[r] = 0
-        results[r]+=1
+    for row in feature:
+        if row not in results:
+            results[row] = 0
+        results[row]+=1
     return results
 
-# Função que calcula a entropia
-def entropy(data, atributo_classificador):
+def entropy(feature):
+    """
+    Esta função realiza o cálculo da entropia
+
+    Input
+    ----------
+    feature: Atributo de interesse
+
+    Output
+    ----------
+    ent: Resultado do cálculo da entropia, onde ent = - p(+)*log2(p(+)) - p(-)*log2(p(-))
+    """
     from math import log
     log2 = lambda x:log(x)/log(2) # Propriedade logarítmica
-    results = uniquecounts(data, atributo_classificador) # função uniquicounts para contar as classes do conjunto.
+    results = uniquecounts(feature) # função uniquicounts para contar as classes do conjunto.
     ent = 0.0
     for r in results.keys():
-        p = float(results[r])/len(data)
+        p = float(results[r])/len(feature)
         ent = ent - p*log2(p) # Calculo de Entropia
     return ent
 
-# Em cada iteração do algoritmo é escolhido o atributo que apresente uma maior ganho.
-# Essa função calcula o ganho de um atributo em relação ao atributo classificador
-def ganho_informacao(data, atributo, atributo_classificador):
+def merito(data, atributo_classificador):
+    """
+    Esta função calcula o mérito da 'data' informada dada a classe 'atributo_classificador', onde
+    merito = (k * rcf)/sqrt(k+k*(k-1)*rff)
+    rcf = (1/k)*sum(is(fi,y)) for all fi in X
+    rff = (1/(k*(k-1)))*sum(is(fi,fj)) for all fi and fj in X
 
+    Input
+    ----------
+    data: subconjunto de features
+    atributo_classificador: atributo classe
+
+    Output
+    ----------
+    merito: quanto menor o mérito, melhor sua pontuação
+    """
+    n_rows, n_features = data.shape # Retorna o número de linhas e colunas
+    rcf = 0
+    rff = 0
+
+    for i in range(n_features):
+        fi = data[:, i] # Isolando coluna 'i'
+        rcf += incerteza_simetrica(fi, atributo_classificador) # Calculando incerteza entre atributo e classe
+        for j in range(n_features):
+            if j > i:
+                fj = data[:, j] # Isolando coluna 'j'
+                rff += incerteza_simetrica(fi, fj) # Calculando incerteza entre atributo e atributo
+        
+    rff *= 2
+    merito = rcf / np.sqrt(n_features + rff) # Simplificação da expressão
+    return merito
+
+def incerteza_simetrica(f1, f2):
+    """
+    Enta função calcula a incerteza simétrica, onde is(f1,f2) = 2*GanhoInformação(f1,f2)/(Entropia(f1)+Entropia(f2))
+    
+    Input
+    ----------
+    f1: feature para comparação
+    f2: feature para comparação
+    
+    Output
+    ----------
+    incerteza: retorna a incerteza simétrica
+    """
+ 
+    # Calculando o Ganho, ganho = gi(f1,f2)
+    ganho = ganho_informacao(f1, f2)
+    # Entropia de f1
+    ent1 = entropy(f1)
+    # Entropia de f2
+    ent2 = entropy(f2)
+
+    incerteza = (2*ganho)/(ent1+ent2)
+
+    return incerteza
+    
+def ganho_informacao(feature1, feature2):
+    """
+    Essa função calcula o ganho de um atributo em relação à outro atributo
+    
+    Input
+    ----------
+    feature1: feature para comparação
+    feature2: feature para comparação
+    
+    Output
+    ----------
+    ganho: retorna o ganho de informação
+    """
     # Recebendo a entropia do atributo classificador
-    ganho = entropy(data, atributo_classificador)
+    ganho = entropy(feature2)
 
     # Verificando valores presentes na coluna do atributo informado
-    dicionario = uniquecounts(data, atributo)
+    dicionario = uniquecounts(feature1)
+
     # Iterando sob cada valor encontrado
     for item in dicionario:
         valor = str(item) # Convertendo Para String
-        set1, set2 = divideset(data, atributo, valor) # Isolando o valor
-        ent = entropy(set1, atributo_classificador) # Calculando a entropia do atributo informado em relação ao atributo classificador
-        
-        ganho = ganho - ((len(set1)/len(data))*ent) # Somatória das entropias (parte da fórmula do ganho de informação)
+        set1 = divideset(feature1, feature2, valor) # Isolando o valor
+        ent = entropy(set1) # Calculando a entropia do atributo informado em relação ao atributo classificador
+        aux = (len(set1)/len(feature1))*ent
+        ganho = ganho - aux # Somatória das entropias (parte da fórmula do ganho de informação)
     
-    print("Ganho: ", ganho)
     return ganho
     
+def cfs(data, atributo_classificador):
+    """
+    Esta função usa uma heurística baseada em correlação para avaliar o valor de atributos que é chamada CFS
     
-    # set1, set2 = divideset(data, atributo, x[0])
+    Input
+    ----------
+    data: subconjunto de features
+    atributo_classificador: atributo classe
+
+    Output
+    ----------
+    np.array(FEATURE): retorna o subconjunto resultado da filtragem
+    """
+
+    n_rows, n_features = data.shape
     
+    # Subconjunto de features
+    FEATURE = []
+    
+    # Histórico de mérito
+    MERITO = []
+
+    # O algoritmo utiliza geração adiante
+    while True:
+        # Valor pequeno para substituição do menor mérito
+        merit = -100000000000
+        # Variável auxiliar
+        idx = -1
+        # Iterações para formação de subgrupos de features
+        for i in range(n_features):
+            if i not in FEATURE:
+                FEATURE.append(i)
+                t = merito(data[:, FEATURE], atributo_classificador)
+                if t > merit:
+                    merit = t
+                    idx = i
+                FEATURE.pop()
+        FEATURE.append(idx)
+        print (merit)
+        MERITO.append(merit)
+        # Critério de parada da execução
+        if len(MERITO) > 5:
+            print("*")
+            if MERITO[len(MERITO)-1] <= MERITO[len(MERITO)-2]:
+                print("**")
+                if MERITO[len(MERITO)-2] <= MERITO[len(MERITO)-3]:
+                    print("***")
+                    if MERITO[len(MERITO)-3] <= MERITO[len(MERITO)-4]:
+                        print("****")
+                        if MERITO[len(MERITO)-4] <= MERITO[len(MERITO)-5]:
+                            print("*****")
+                            break
+
+    return np.array(FEATURE) # Cria uma nova data com as features selecionadas
 
 if __name__ == '__main__':
     #Leitura data
-    # data = getData('data/data1.csv')
-    # data = pd.read_csv('data/data1.csv')
-    # tuples = [tuple(x) for x in data.values]
-    # datal = list(data)
-    # print (tuples)
-    # my_data=[['slashdot','USA','yes',18,'None'],
-    # ['google','France','yes',23,'Premium'],
-    # ['digg','USA','yes',24,'Basic'],
-    # ['kiwitobes','France','yes',23,'Basic'],
-    # ['google','UK','no',21,'Premium'],
-    # ['(direct)','New Zealand','no',12,'None'],
-    # ['(direct)','UK','no',21,'Basic'],
-    # ['google','USA','no',24,'Premium'],
-    # ['slashdot','France','yes',19,'None'],
-    # ['digg','USA','no',18,'None'],
-    # ['google','UK','no',18,'None'],
-    # ['kiwitobes','UK','no',19,'None'],
-    # ['digg','New Zealand','yes',12,'Basic'],
-    # ['slashdot','UK','no',21,'None'],
-    # ['google','UK','yes',18,'Basic'],
-    # ['kiwitobes','France','yes',19,'Basic']]
+    dat = pd.read_csv('data/data4.csv')
+    tuples = [tuple(x) for x in dat.values]
 
-    # # Calculo de Entropia
-    # x = entropy(tuples)
-    # print (uniquecounts(my_data, -1))
-    # print (uniquecounts(tuples, 1))
+    data = np.asarray(tuples)
 
-    treino = [
-    ['D1', 'Sol', 'Quente', 'Elevada', 'Fraco', 'Não'],
-    ['D2', 'Sol', 'Quente', 'Elevada', 'Forte', 'Não'],
-    ['D3', 'Nuvens', 'Quente', 'Elevada', 'Fraco', 'Sim'],
-    ['D4', 'Chuva', 'Ameno', 'Elevada', 'Fraco', 'Sim'],
-    ['D5', 'Chuva', 'Fresco', 'Normal', 'Fraco', 'Sim'],
-    ['D6', 'Chuva', 'Fresco', 'Normal', 'Forte', 'Não'],
-    ['D7', 'Nuvens', 'Fresco', 'Normal', 'Fraco', 'Sim'],
-    ['D8', 'Sol', 'Ameno', 'Elevada', 'Fraco', 'Não'],
-    ['D9', 'Sol', 'Fresco', 'Normal', 'Fraco', 'Sim'],
-    ['D10', 'Chuva', 'Ameno', 'Normal', 'Forte', 'Sim'],
-    ['D11', 'Sol', 'Ameno', 'Normal', 'Forte', 'Sim'],
-    ['D12', 'Nuvens', 'Ameno', 'Elevada', 'Forte', 'Sim'],
-    ['D13', 'Nuvens', 'Quente', 'Normal', 'Fraco', 'Sim'],
-    ['D14', 'Chuva', 'Ameno', 'Elevada', 'Forte', 'Não']
-    ]
+    # Importante informar no segundo parâmetro qual é o atributo classificador, no caso, o último    
+    selection_feature = cfs(data, data[:,-1])
+    print(selection_feature)
+    
 
-    # x = entropy(treino, 5)
-    # print(x)
-
-    ganho_informacao(treino, 2, 5)
 
