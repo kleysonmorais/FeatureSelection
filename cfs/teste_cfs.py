@@ -27,7 +27,8 @@ B, M = y.value_counts()
 print('Number of Benign: ',B)
 print('Number of Malignant : ',M)
 
-# features = cfs.cfs(np.asarray(x), np.asarray(y)) // Features Selecionadas = [24, 8, 20, 0, 4, 1]
+features = cfs.cfs(np.asarray(x), np.asarray(y)) 
+# // Features Selecionadas = [24, 8, 20, 0, 4, 1]
 
 # Removendo Atributos Não Selecionados
 x_1 = x.drop(x.columns[[2,3,5,6,7,9,10,11,12,13,14,15,

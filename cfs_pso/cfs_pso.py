@@ -1,3 +1,13 @@
+#------------------------------------------------------------------------------+
+#
+#   Morais, Kleyson.
+#   Correlation-Based Feature Selection-CFS with Python
+#   April, 2018
+#
+#------------------------------------------------------------------------------+
+
+#--- IMPORT DEPENDENCIES ------------------------------------------------------+
+
 import numpy as np
 import seaborn as sns
 import pandas as pd
@@ -6,14 +16,6 @@ import pyswarms as ps
 import cfs
 from sklearn import linear_model
 from sklearn.datasets import make_classification
-
-# data = pd.read_csv('data/data4min.csv')
-# col = data.columns
-# y = np.asarray(data.Churn_Status)
-
-# list = ['Churn_Status']
-# X = np.asarray(data.drop(list,axis = 1))
-
 
 class cfs_pso:
     X = []
