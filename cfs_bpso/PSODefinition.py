@@ -21,13 +21,11 @@ class PSOGeneric():
         print ("PSOProblem Result:")
 
     def plotResults(self):
-#        print self._plotPoints
         x = []
         y = []
         for (generation, fitness) in self._plotPoints:
             x.append(fitness)
             y.append(generation)
-#            print "%.4f" % (fitness)
         pyl.plot(x, y)
         
         pyl.grid(True)
@@ -38,12 +36,11 @@ class PSOGeneric():
 
         pyl.show()
 
-#---- Continuous Binary PSO Problem
 class CBPSOProblem(PSOGeneric):
 
     def __init__(self, topology="gbest"):
         print("\nBPSO")
-        # Problem parameters
+        
         solution5 = [1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1, 0, 0, 1]
         solucao  = solution5
 
@@ -57,38 +54,33 @@ class CBPSOProblem(PSOGeneric):
         print("Quantidade de Gerações: ", geracoes)
         print("Topology: ", topology)
 
-        # Swarm Initialization
-        swarm   = SwarmModel()
-        sc      = SwarmController(solucao)
-        sc.initSwarm(swarm, topology, tamPopulacao, dimensoes)
+        enxame   = EnxameModel()
+        ec      = EnxameController(solucao)
+        ec.initEnxame(enxame, topology, tamPopulacao, dimensoes)
         
-        # Output Results
         fitness = 1
         idx = 0
         for i in range(geracoes):
-            sc.updateSwarm(swarm)
-            if swarm._bestPositionFitness < fitness:
-                fitness = swarm._bestPositionFitness
+            ec.updateEnxame(enxame)
+            if enxame._melhorPosicaoFitness < fitness:
+                fitness = enxame._melhorPosicaoFitness
                 idx = i
             gen = i+1
-            fit = dimensoes - (dimensoes * swarm._bestPositionFitness)
+            fit = dimensoes - (dimensoes * enxame._melhorPosicaoFitness)
             self._plotPoints.append( (gen, fit) )
-#            self._plotPoints += (i+1, 1 - swarm._bestPositionFitness)
-            print ("Generation", i+1,"\t-> BestPos:", swarm._bestPosition, "\tBestFitness:", swarm._bestPositionFitness)
+            print ("Generation", i+1,"\t-> BestPos:", enxame._melhorPosicao, "\tBestFitness:", enxame._melhorPosicaoFitness)
         
-#         print ("\n===================================================================")
-#         print ("Dimensions:\t", dimensoes)
-#         print ("Solution:\t", np.array(solucao))
-#         print ("Best Result:\t", swarm._bestPosition)
-#         print ("Best Fitness:\t", 1 - swarm._bestPositionFitness, "in %d" % idx, " iteration out of %d" % geracoes)
-#         print ("Number of bits out of place: %d" % (dimensoes * swarm._bestPositionFitness))
-#         print ("===================================================================")
+        print ("\n===================================================================")
+        print ("Dimensions:\t", dimensoes)
+        print ("Solution:\t", np.array(solucao))
+        print ("Best Result:\t", enxame._melhorPosicao)
+        print ("Best Fitness:\t", 1 - enxame._melhorPosicaoFitness, "in %d" % idx, " iteration out of %d" % geracoes)
+        print ("Number of bits out of place: %d" % (dimensoes * enxame._melhorPosicaoFitness))
+        print ("===================================================================")
         
     def plotResults(self):
-#        print self._plotPoints
         x = []
         y = []
         for (generation, fitness) in self._plotPoints:
             x.append(fitness)
             y.append(generation)
-#            print "%d" % (fitness)

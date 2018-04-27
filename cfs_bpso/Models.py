@@ -1,5 +1,5 @@
 #---- Representação da Partícula
-class ParticleModel:
+class ParticulaModel:
     _posicao           = None
     _velocidade        = None
     _melhorPosicao     = None
@@ -14,7 +14,7 @@ class ParticleModel:
         self._fitness           = None
 
 #---- Representação do Enxame
-class SwarmModel:
+class EnxameModel:
     _particulas              = None
     _vizinhanca              = None
     _melhorPosicao           = None
