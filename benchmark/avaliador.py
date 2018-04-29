@@ -1,0 +1,57 @@
+import numpy as np
+
+from sklearn import svm
+from sklearn import tree
+from sklearn.naive_bayes import GaussianNB
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import f1_score,confusion_matrix
+from sklearn.metrics import accuracy_score
+
+class AvaliadorController():
+
+    dados                   = None
+    atributoClassificador   = None
+
+    def __init__(self, dados, atributoClassificador):
+        self.dados                  = dados
+        self.atributoClassificador  = atributoClassificador
+
+    def selectionFeatures(self, features):
+        aux = np.asarray(self.dados)
+        if np.count_nonzero(features) == 0:
+            X_subset = aux
+        else:
+            X_subset = aux[:,features==1]
+        return X_subset
+
+    def allClassifiers(self, features):
+        self.RandomForest(features)
+        self.NaiveBayes(features)
+        self.DecisionTree(features)
+        self.SupportVectorMachines(features)
+
+    def RandomForest(self, features):
+        print("\nRandom Forest Classifier")        
+        self.metrics(RandomForestClassifier(random_state=43), features)
+
+    def NaiveBayes(self, features):
+        print("\nNaive Bayes Classifier")
+        self.metrics(GaussianNB(), features)
+
+    def DecisionTree(self, features):
+        print("\nDecision Tree Classifier")
+        self.metrics(tree.DecisionTreeClassifier(), features)
+
+    def SupportVectorMachines(self, features):
+        print("\nSupport Vector Machines Classifier")
+        self.metrics(svm.SVC(), features)
+
+    def metrics(self, classificador, features):
+        # split data train 70 % and test 30 %
+        X_subset = self.selectionFeatures(features)
+        x_train, x_test, y_train, y_test = train_test_split(X_subset, self.atributoClassificador, test_size=0.3, random_state=42)
+        classificador = classificador.fit(x_train,y_train)
+        ac = accuracy_score(y_test,classificador.predict(x_test))
+        print('Acurácia após a Selection Feature Aplicada (', X_subset.shape[1] ,' atributos) é: ', ac*100,'%')
+    

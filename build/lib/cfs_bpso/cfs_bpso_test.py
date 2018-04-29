@@ -1,0 +1,3 @@
+from PSODefinition import *
+
+CBPSOProblem()
