@@ -1,2 +1,0 @@
-network_age	Customer tenure in month	Total Spend in Months 1 and 2 of 2017	Total SMS Spend	Total Data Spend	Total Data Consumption	Total Unique Calls	Total Onnet spend 	Total Offnet spend	Total Call centre complaint calls	Network type subscription in Month 1	Network type subscription in Month 2			Churn Status
-

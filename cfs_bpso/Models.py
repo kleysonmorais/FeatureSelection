@@ -1,38 +1,43 @@
-#---- Representação da Partícula
+#------------------------------------------------------------------------------+
+#
+#   Morais, Kleyson.
+#   April, 2018
+#
+#------------------------------------------------------------------------------+
+
+#--- IMPORT DEPENDENCIES ------------------------------------------------------+
+
+# Representação da Partícula
 class ParticulaModel:
-    _posicao           = None
-    _velocidade        = None
-    _melhorPosicao     = None
-    _melhorPosicaoPas  = None
-    _fitness           = None
+    _posicao                 = None
+    _velocidade              = None
+    _melhorPosicaoLocal      = None
+    _melhorPosicaoGlobal     = None
+    _fitness                 = None
 
     def __init__(self):
-        self._posicao           = None
-        self._velocidade        = None
-        self._melhorPosicao     = None
-        self._melhorPosicaoPas  = None
-        self._fitness           = None
+        self._posicao               = None
+        self._velocidade            = None
+        self._melhorPosicaoLocal    = None
+        self._melhorPosicaoGlobal   = None
+        self._fitness               = None
 
-#---- Representação do Enxame
+# Representação do Enxame
 class EnxameModel:
-    _particulas              = None
-    _vizinhanca              = None
-    _melhorPosicao           = None
-    _melhorPosicaoFitness    = None
-    
-    def __init__(self):
-        self._particulas = []
-        self._vizinhanca             = None
-        self._melhorPosicao          = None
-        self._melhorPosicaoFitness   = None
+    _particulas                     = None
+    _melhorPosicaoGlobal            = None
+    _melhorFitness                  = None
 
-#---- Representação da Vizinhança    
-class VizinhancaModel:
-    _particulas              = []
-    _melhorPosicao           = None
-    _melhorPosicaoFitness    = None
-    
-    def __init__(self, particulas):
-        self._particulas             = particulas
-        self._melhorPosicao          = None
-        self._melhorPosicaoFitness   = None
+    def __init__(self):
+        self._particulas                  = []
+        self._melhorPosicaoGlobal         = None
+        self._melhorFitness               = None
+
+# Representação dos Dados
+class DadosModel:
+    _dados                      = None
+    _atributoClassificador      = None
+
+    def __init__(self, dados, atributoClassificador):
+        self._dados = dados
+        self._atributoClassificador = atributoClassificador

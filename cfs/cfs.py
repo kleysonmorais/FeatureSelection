@@ -74,11 +74,11 @@ def entropy(feature):
         ent = ent - p*log2(p) # Calculo de Entropia
     return ent
 
-def meritoBuffer(data, atributo_classificador, particula):
-    buffer = BufferController().search_buffer(particula)
+def meritoBuffer(data, atributo_classificador, particula, nome_base_dados):
+    buffer = BufferController().search_buffer(particula, nome_base_dados)
     if buffer == None:
         m = merito(data,atributo_classificador)
-        BufferController().save_buffer(particula, m)
+        BufferController().save_buffer(particula, m, nome_base_dados)
         return m
     else:
         return buffer
