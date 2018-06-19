@@ -29,8 +29,6 @@ objective, subjective = y.value_counts()
 print('Number of Objective: ', objective)
 print('Number of Subjective : ', subjective)
 
-print(X.shape)
-
 x_train, x_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
 classificador = GaussianNB().fit(x_train,y_train)
 ac = accuracy_score(y_test, classificador.predict(x_test))

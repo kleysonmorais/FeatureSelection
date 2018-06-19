@@ -9,8 +9,6 @@
 
 from Models import *
 from benchmark.avaliador import AvaliadorController
-from Visualiza import *
-
 import numpy as np
 
 class ParticulaController:
@@ -94,14 +92,13 @@ class EnxameController:
         self.dadosModel = DadosModel
 
     def criarEnxame(self, enxame, nParticulas):
-        print("-----------------------------------------------------------------")
         print("Criando Enxame de Partículas")
         for i in range(nParticulas):
             #Criando instância de uma nova partícula e adicionando ao enxame
             novaParticula = ParticulaModel()
             self.pc.criarParticular(novaParticula, self.dadosModel)
             enxame._particulas.append(novaParticula)
-        print("-----------------------------------------------------------------\n")
+        
         self.atualizaMelhorPosicaoEnxame(enxame)
         
     def atualizaMelhorPosicaoEnxame(self, enxame):
@@ -110,8 +107,7 @@ class EnxameController:
         for particula in enxame._particulas:
             if (enxame._melhorFitness is None) or (particula._fitness > enxame._melhorFitness):
                 enxame._melhorPosicaoGlobal = np.copy(particula._melhorPosicaoLocal)
-                enxame._melhorFitness = particula._fitness  
-                Visualiza().show(particula=particula._melhorPosicaoLocal) 
+                enxame._melhorFitness = particula._fitness    
             
         print("Partícula com a Melhor Posição Global: ")
         print(enxame._melhorPosicaoGlobal, ' | ', enxame._melhorFitness)
