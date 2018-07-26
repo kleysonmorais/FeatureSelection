@@ -23,5 +23,5 @@ setup(
     author = AUTHOR,
     author_email = AUTHOR_EMAIL,
     url = URL,
-    packages =["cfs","cfs_bcso","cfs_bpso","cfs_pso","data","buffer","benchmark",] ,
+    packages =["cfs","cfs_bcso","cfs_bpso","cfs_pso","data","buffer","benchmark","pso_nb"] ,
 )
